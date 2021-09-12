@@ -1,5 +1,5 @@
 body {
-    background-color: #30c1ea;
+    background: linear-gradient(0deg, rgba(80,174,244,1) 0%, rgba(255,252,252,1) 50%, rgba(80,174,244,1) 100%);
     width: 250px;
     height: 400px;
 }
@@ -7,11 +7,24 @@ body {
 h1 {
     text-align: center;
     font-size: 15px;
+    margin-top: 30px;
+}
+
+p {
+    width: 30px;
 }
 
 .selector {
-    margin: 0 auto;
-    width: 80vw;
-    height: 50px;
+    font-size: 20px;
+    margin-left: 15%;
+    width: 70%;
 }
 
+.button {
+    width: 30%;
+    margin: 30px 35%;
+}
+
+.button:hover{
+    cursor: pointer;
+}
