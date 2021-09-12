@@ -1,0 +1,17 @@
+body {
+    background-color: #30c1ea;
+    width: 250px;
+    height: 400px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 15px;
+}
+
+.selector {
+    margin: 0 auto;
+    width: 80vw;
+    height: 50px;
+}
+
