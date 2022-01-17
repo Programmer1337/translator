@@ -3,6 +3,7 @@ let text
 let toLang = 'en'
 let requestsPending = 0
 let isOn
+let stack = []
 
 const synchronizeData = () => {
 	chrome.storage.sync.get(['lang'], function (result) {
@@ -20,7 +21,6 @@ const synchronizeData = () => {
 		} else {
 			isOn = true
 			chrome.storage.sync.set({state: 'on'});
-
 		}
 	});
 
@@ -53,9 +53,31 @@ const sendReq = (text = 'Hello World', elem) => {
 	xhr.open("POST", `https://microsoft-translator-text.p.rapidapi.com/translate?api-version=3.0&to=${toLang}&textType=plain&profanityAction=NoAction`);
 	xhr.setRequestHeader("content-type", "application/json");
 	xhr.setRequestHeader("x-rapidapi-host", "microsoft-translator-text.p.rapidapi.com");
-	xhr.setRequestHeader("x-rapidapi-key", "c26b23dd8fmshdd3a251db7ca47fp1b0f2cjsnd350dd6bac9e");
+	xhr.setRequestHeader("x-rapidapi-key", "82dcf3c090msh3e66c3682cd737cp1c7693jsne9a780818f99");
 
 	xhr.send(data);
+}
+const sendReq1 = () => {
+	console.log('sending')
+	fetch("http://localhost:3000/translate", {
+		"method": "POST",
+		"headers": {
+			'Accept': 'application/json',
+			"content-type": "application/json",
+			"x-rapidapi-host": "microsoft-translator-text.p.rapidapi.com",
+			"x-rapidapi-key": "82dcf3c090msh3e66c3682cd737cp1c7693jsne9a780818f99"
+		},
+		body: JSON.stringify({temp: "temp"})
+	})
+		.then(response => {
+			console.log(response);
+			console.log(response.text());
+			console.log(response.json());
+			console.log('123')
+		})
+		.catch(err => {
+			console.error(err);
+		});
 }
 
 function translate(text, elem) {
@@ -67,29 +89,109 @@ function translate(text, elem) {
 			elem: elem,
 			defaultValue: elem.nodeValue
 		})
-		sendReq(filteredText, elem)
+		// sendReq(filteredText, elem)
+		// sendReq1(filteredText, elem)
 		requestsPending++
 	}
 	return text
 }
 
 
-document.addEventListener('mousedown', () => {
+function sendRequest() {
+	clear(true);
+	requestsPending++;
+	let requestedElems = []
+	let body = {}
+	stack = stack.filter(function (value, index) {
+		value = value.text
+		const filteredText = value.replace(/\s+/g, ' ').trim().split('').filter(value => (value !== '\n')).join('').split(' ').filter(value => (value !== ' ') && (value !== "\n") && (value !== '')).join(' ')
+		// console.log('filteredText:', filteredText, ((/[a-zA-Z]/g.test(filteredText)) || (/[а-яА-Я]/g.test(filteredText))))
+		return ((/[a-zA-Z]/g.test(filteredText)) || (/[а-яА-Я]/g.test(filteredText)))
+	})
+
+
+	// console.log('имеются пары', stack)
+
+	stack.forEach(function (value, index) {
+		changedElems.push({
+			elem: value.elem,
+			defaultValue: value.text
+		})
+		requestedElems.push(value.elem)
+		body[index] = value.text.trim()
+	})
+
+	console.log('sending', stack)
+	fetch("http://localhost:3000/translate", {
+		"method": "POST",
+		"headers": {
+			'Accept': 'application/json',
+			"content-type": "application/json",
+			"x-rapidapi-host": "microsoft-translator-text.p.rapidapi.com",
+			"x-rapidapi-key": "82dcf3c090msh3e66c3682cd737cp1c7693jsne9a780818f99"
+		},
+		body: JSON.stringify(body)
+	})
+		.then(response => {
+			requestsPending--
+			if (requestsPending) {
+				console.log("returning", requestsPending)
+				return
+			}
+			response.json().then(res => {
+				if (requestsPending) {
+					console.log("returning", requestsPending)
+					return
+				}
+				console.log(res)
+				requestedElems.forEach(function (value, index) {
+					if (changedElems.find(function (val) {
+						return val.elem === value
+					})) {
+						value.nodeValue = res[index]
+					}
+				})
+			});
+		})
+		.catch(err => {
+			requestsPending--
+			console.error(err);
+		});
+
+	stack = []
+
+}
+
+
+document.addEventListener('selectionchange', clear.bind(undefined,false), false)
+
+function clear(forced = false) {
+	// console.log('selection changed, current is ', document.getSelection())
+		if (!document.getSelection().getRangeAt(0).collapsed) {
+			if (!forced)
+			return
+		}
+	console.log('forced is',forced)
+	console.log('clearing')
 	synchronizeData()
+	console.log("ВОЗВРАЩАЕМ", changedElems.length)
 	if (isOn) {
 		changedElems.forEach(value => {
 			value.elem.nodeValue = value.defaultValue
-			value.elem.parentElement.normalize()
+			// console.log('нормализируем',value, value.elem)
+			value.elem.parentElement && value.elem.parentElement.normalize()
 		})
 		while (changedElems.length)
 			changedElems.pop()
-		if ((document.getSelection().anchorNode) && (!document.getSelection().getRangeAt(0).collapsed))
-			document.getSelection().removeRange(document.getSelection().getRangeAt(0))
+		// 	document.getSelection().removeRange(document.getSelection().getRangeAt(0))
 	}
-}, false)
+}
+
 
 document.addEventListener("mouseup", () => {
-	text = document.getSelection().toString()
+	console.log("начинаем")
+	clear(true)
+	// text = document.getSelection().toString()
 	const selection = document.getSelection()
 	const range = selection.anchorNode ? selection.getRangeAt(0) : null
 	if (range && !range.collapsed && isOn) {
@@ -118,7 +220,11 @@ document.addEventListener("mouseup", () => {
 
 			if (elem.nodeType === 3) {
 				const newElem = elem
-				translate(newElem.nodeValue, newElem)
+				// translate(newElem.nodeValue, newElem)
+				stack.push({
+					text: newElem.nodeValue,
+					elem: newElem
+				})
 			}
 			if ((elem instanceof Element) && (elem.tagName === 'E'))
 				break
@@ -131,6 +237,7 @@ document.addEventListener("mouseup", () => {
 		document.getSelection().addRange(newR)
 		newStartNode.remove()
 		newEndNode.remove()
+		sendRequest()
 	}
 }, false)
 
