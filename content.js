@@ -53,7 +53,7 @@ const sendReq = (text = 'Hello World', elem) => {
 	xhr.open("POST", `https://microsoft-translator-text.p.rapidapi.com/translate?api-version=3.0&to=${toLang}&textType=plain&profanityAction=NoAction`);
 	xhr.setRequestHeader("content-type", "application/json");
 	xhr.setRequestHeader("x-rapidapi-host", "microsoft-translator-text.p.rapidapi.com");
-	xhr.setRequestHeader("x-rapidapi-key", "82dcf3c090msh3e66c3682cd737cp1c7693jsne9a780818f99");
+	xhr.setRequestHeader("x-rapidapi-key", "");
 
 	xhr.send(data);
 }
@@ -65,7 +65,7 @@ const sendReq1 = () => {
 			'Accept': 'application/json',
 			"content-type": "application/json",
 			"x-rapidapi-host": "microsoft-translator-text.p.rapidapi.com",
-			"x-rapidapi-key": "82dcf3c090msh3e66c3682cd737cp1c7693jsne9a780818f99"
+			"x-rapidapi-key": ""
 		},
 		body: JSON.stringify({temp: "temp"})
 	})
@@ -128,7 +128,7 @@ function sendRequest() {
 			'Accept': 'application/json',
 			"content-type": "application/json",
 			"x-rapidapi-host": "microsoft-translator-text.p.rapidapi.com",
-			"x-rapidapi-key": "82dcf3c090msh3e66c3682cd737cp1c7693jsne9a780818f99"
+			"x-rapidapi-key": ""
 		},
 		body: JSON.stringify(body)
 	})
