@@ -62,7 +62,7 @@ function sendRequest() {
 		body[index] = value.text.trim();
 	})
 
-	fetch("http://localhost:3000/translate", {
+	fetch("https://enigmatic-garden-23759.herokuapp.com/translate", {
 		"method": "POST",
 		"headers": {
 			'Accept': 'application/json',
