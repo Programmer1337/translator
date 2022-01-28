@@ -43,7 +43,6 @@ function removeListeners() {
 
 function sendRequest() {
 	clear(true);
-	requestsPending++;
 	let requestedElems = [];
 	let body = {};
 	stack = stack.filter(function (value, index) {
@@ -51,7 +50,9 @@ function sendRequest() {
 		const filteredText = value.replace(/\s+/g, ' ').trim().split('').filter(value => (value !== '\n')).join('').split(' ').filter(value => (value !== ' ') && (value !== "\n") && (value !== '')).join(' ');
 		return ((/[a-zA-Z]/g.test(filteredText)) || (/[а-яА-Я]/g.test(filteredText)));
 	})
-
+	if (!stack.length){
+		return
+	}
 
 	stack.forEach(function (value, index) {
 		changedElems.push({
@@ -61,6 +62,8 @@ function sendRequest() {
 		requestedElems.push(value.elem);
 		body[index] = value.text.trim();
 	})
+	requestsPending++;
+	document.body.style.cursor = 'progress';
 
 	fetch("https://enigmatic-garden-23759.herokuapp.com/translate", {
 		"method": "POST",
@@ -80,6 +83,7 @@ function sendRequest() {
 				if (requestsPending) {
 					return;
 				}
+				document.body.style.cursor = 'default';
 				requestedElems.forEach(function (value, index) {
 					if (changedElems.find(function (val) {
 						return val.elem === value;

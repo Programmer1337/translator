@@ -1,6 +1,6 @@
 {
   "name": "Translator",
-  "version": "1.1",
+  "version": "2.1",
   "manifest_version": 2,
   "description": "This extension allows you to fast translate any text on the page, just selecting it ",
   "content_scripts": [
